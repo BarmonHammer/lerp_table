@@ -2,7 +2,7 @@ use ordered_float::{FloatIsNan, NotNan};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(try_from = "Vec<Coord>", into = "Vec<(NotNan<f64>, NotNan<f64>)>")]
 pub struct Piecewise(Vec<Coord>);
 
@@ -14,11 +14,11 @@ pub enum PiecewiseErr {
     InputUndefined,
     #[error("The value is not in the domain")]
     NotInDomain,
-    #[error("The value provided is NaN")]
-    InputNaN,
+    #[error(transparent)]
+    InputNaN(#[from] FloatIsNan),
 }
 
-#[derive(Copy, Clone, Serialize, Deserialize, Debug)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Coord(NotNan<f64>, NotNan<f64>);
 
 impl From<Coord> for (NotNan<f64>, NotNan<f64>) {
@@ -88,7 +88,7 @@ impl Piecewise {
         self.0.as_slice()
     }
     pub fn y_at_x(&self, value: f64) -> Result<f64, PiecewiseErr> {
-        let value = NotNan::new(value).map_err(|_| PiecewiseErr::InputNaN)?;
+        let value = NotNan::new(value)?;
         let data = self.as_slice();
         //since we know the domains have to be sorted (try_from will result Err if not)
         //we can binary search the domains to find the domain needed
