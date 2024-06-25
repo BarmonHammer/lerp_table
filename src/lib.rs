@@ -1,8 +1,11 @@
 use ordered_float::{FloatIsNan, NotNan};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
+)]
 #[serde(try_from = "Vec<Coord>", into = "Vec<(NotNan<f64>, NotNan<f64>)>")]
 pub struct Piecewise(Vec<Coord>);
 
@@ -18,7 +21,9 @@ pub enum PiecewiseErr {
     InputNaN(#[from] FloatIsNan),
 }
 
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
+)]
 pub struct Coord(NotNan<f64>, NotNan<f64>);
 
 impl From<Coord> for (NotNan<f64>, NotNan<f64>) {
